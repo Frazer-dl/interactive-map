@@ -6,12 +6,23 @@ const MapComponent = () => {
     const [plots, setPlots] = useState([]);
     const [activePlot, setActivePlot] = useState(null);
 
+    // Инициализируем состояние для центра карты и зума
+    const [mapState, setMapState] = useState({
+        center: [55.27755706967344, 37.733425530572525], // Начальные координаты
+        zoom: 10, // Начальный зум
+    });
+
     useEffect(() => {
         const loadPlots = async () => {
             try {
-                const response = await fetch("/data.json");
+                let response = await fetch('/interactive-map/data.json');
+                if (!response.ok) {
+                    response = await fetch('/data.json');
+                }
+                if (!response.ok) {
+                    throw new Error('Error loading data');
+                }
                 const data = await response.json();
-
                 const transformedData = data.map((plot) => ({
                     ...plot,
                     coordinates: [plot.coordinates.map(([lon, lat]) => [lat, lon])],
@@ -55,8 +66,8 @@ const MapComponent = () => {
                 <YMaps>
                     <Map
                         defaultState={{
-                            center: [55.27755706967344, 37.733425530572525],
-                            zoom: 10,
+                            center: mapState.center,  // Центр карты
+                            zoom: mapState.zoom,      // Зум карты
                         }}
                         width="100%"
                         height="100%"
